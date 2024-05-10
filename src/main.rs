@@ -6,6 +6,7 @@ mod controlcenter;
 mod jrpc;
 
 #[derive(Debug, Parser)]
+#[command(about, version)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
