@@ -19,16 +19,16 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-        
+
       - name: Install rust toolchain
         shell: bash
         run: rustup set profile minimal; rustup update && rustup component add rustfmt clippy
-      
+
       - name: cargo build
         shell: bash
         run: cargo build --release
 
       - uses: actions/upload-artifact@v4
         with:
-          name: "elgato-control-center"
+          name: "elgato-control-center-${{ runner.os }}-${{ runner.arch }}"
           path: "target/release/elgato-control-center"
