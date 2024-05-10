@@ -1,7 +1,14 @@
 [package]
 name = "elgato-control-center"
+authors = ["Nik Johnson"]
+description = "A CLI for the Elgato Control Center application"
+readme = "README.md"
+repository = "https://github.com/nik-johnson-net/elgato-control-center"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
+categories = ["command-line-utilities"]
+exclude = ["/.github"]
 
 [dependencies]
 anyhow = "1.0.83"
