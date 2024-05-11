@@ -10,6 +10,9 @@ mod jrpc;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    #[arg(short, long)]
+    url: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]
@@ -34,10 +37,14 @@ enum Commands {
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), anyhow::Error> {
     let args = Cli::parse();
+    let cc = if let Some(url) = args.url {
+        ControlCenter::connect_url(url).await?
+    } else {
+        ControlCenter::connect().await?
+    };
 
     match args.command {
         Commands::Devices => {
-            let cc = ControlCenter::connect().await?;
             let devices = cc.devices().await?;
             println!("id,name");
             for device in devices {
@@ -45,20 +52,22 @@ async fn main() -> Result<(), anyhow::Error> {
             }
         }
         Commands::On { device } => {
-            modify_device_or_all(device, |config| config.modify().set_on(true)).await?;
+            modify_device_or_all(&cc, device, |config| config.modify().set_on(true)).await?;
         }
         Commands::Off { device } => {
-            modify_device_or_all(device, |config| config.modify().set_on(false)).await?;
+            modify_device_or_all(&cc, device, |config| config.modify().set_on(false)).await?;
         }
         Commands::SetBrightness { brightness, device } => {
-            modify_device_or_all(device, |config| config.modify().set_brightness(brightness))
-                .await?;
+            modify_device_or_all(&cc, device, |config| {
+                config.modify().set_brightness(brightness)
+            })
+            .await?;
         }
         Commands::SetTemperature {
             temperature,
             device,
         } => {
-            modify_device_or_all(device, |config: DeviceConfiguration| {
+            modify_device_or_all(&cc, device, |config: DeviceConfiguration| {
                 config.modify().set_temperature(temperature)
             })
             .await?;
@@ -69,10 +78,10 @@ async fn main() -> Result<(), anyhow::Error> {
 }
 
 async fn modify_device_or_all<F: Fn(DeviceConfiguration) -> SetDeviceConfiguration>(
+    cc: &ControlCenter,
     device: Option<String>,
     function: F,
 ) -> Result<(), anyhow::Error> {
-    let cc = ControlCenter::connect().await?;
     let devices = cc.devices().await?;
 
     if let Some(device) = device {

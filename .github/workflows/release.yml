@@ -31,4 +31,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: "elgato-control-center-${{ runner.os }}-${{ runner.arch }}"
-          path: "target/release/elgato-control-center"
+          path: "target/release/elgato-control-center*"

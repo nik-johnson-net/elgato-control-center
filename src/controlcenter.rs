@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::jrpc::Jrpc;
 
+const DEFAULT_URL: &str = "ws://127.0.0.1:1804/";
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Device {
@@ -95,8 +97,12 @@ pub struct ControlCenter {
 
 impl ControlCenter {
     pub async fn connect() -> Result<ControlCenter> {
+        ControlCenter::connect_url(DEFAULT_URL).await
+    }
+
+    pub async fn connect_url<T: AsRef<str>>(url: T) -> Result<ControlCenter> {
         let response = reqwest::Client::default()
-            .get("ws://172.19.80.1:1804/")
+            .get(url.as_ref())
             .timeout(Duration::from_secs(2))
             .upgrade()
             .send()
